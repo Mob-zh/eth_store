@@ -7,7 +7,7 @@
 int main()
 {
 
-    if (ec_init("ens33"))
+    if (ec_init("eth1"))
     {
         if (ec_config_init(FALSE) > 0)
         {
@@ -38,7 +38,7 @@ int main()
     }
     else
     {
-        printf("Failed to init EtherCAT network")
+        printf("Failed to init EtherCAT network");
     }
     return 0;
 }

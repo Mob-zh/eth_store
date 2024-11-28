@@ -5,6 +5,12 @@
 #define RFIDSCANER_DEV "/dev/ttySTM1"
 #define RFIDDATASIZE 28
 #define MAX_ELEM_TYPE_SIZE 30
+#define DEFAULT_STORE_TYPE "混合"
+#define STORE_TYPE_MIX "混合"
+#define STORE_TYPE_O "电阻"
+#define STORE_TYPE_F "电容"
+#define STORE_TYPE_H "电感"
+#define STORE_TYPE_C "芯片"
 
 enum ELEM_TYPE
 {
@@ -46,6 +52,13 @@ struct element
     uint16_t shelf_id; //所属货架id
     uint16_t slot_id;  //所属货架格id
     char desc[15];     //型号
+};
+
+struct shelf
+{
+    uint16_t shelf_id; //所属货架id
+    char store_type[MAX_ELEM_TYPE_SIZE];
+    int capacity;
 };
 
 /**

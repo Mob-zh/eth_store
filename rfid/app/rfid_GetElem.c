@@ -55,7 +55,7 @@ void io_handler(int s)
         //提取rfid数据
         //memcpy(&em.id, &rfid_data[7], 4); 会导致字节序反转
         em.id = (rfid_data[7] << 24) + (rfid_data[8] << 16) + (rfid_data[9] << 8) + rfid_data[10];
-        printf("card_id = %d ", em.id);
+        printf("card_id = %x ", em.id);
         set_emtype(&em, rfid_data[11]);
         printf("elem_type = %s ", em.type);
         printf("\n");
@@ -73,7 +73,6 @@ void io_handler(int s)
             em.value = (rfid_data[16] << 8) + rfid_data[17];
             int unit = rfid_data[18];
             rfid_utos(unit, em.unit);
-            //printf("units_id=%d units=%s\n", em.units, unit);
 
             printf("%d%s", em.value, em.unit);
             break;
@@ -84,8 +83,8 @@ void io_handler(int s)
             break;
         }
         //分配存放位置
-        em.shelf_id = 1;
-        em.slot_id = 1;
+        alloc_position(db, &em);
+
         printf("\n");
 
         Add_Elem(db, &em);

@@ -53,16 +53,16 @@ int set_emtype(struct element *em, uint8_t btype)
 	switch (btype)
 	{
 	case RESISTANCE:
-		strcpy(em->type, "电阻");
+		strcpy(em->type, STORE_TYPE_O);
 		break;
 	case CAPACITANCE:
-		strcpy(em->type, "电容");
+		strcpy(em->type, STORE_TYPE_F);
 		break;
 	case INDUCTANCE:
-		strcpy(em->type, "电感");
+		strcpy(em->type, STORE_TYPE_H);
 		break;
 	case CHIP:
-		strcpy(em->type, "芯片");
+		strcpy(em->type, STORE_TYPE_C);
 		break;
 	default:
 		return -1;

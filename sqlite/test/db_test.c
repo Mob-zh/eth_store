@@ -3,53 +3,47 @@
 #include <sqlite3.h>
 #include "rfid_db.h"
 
-#define STORE_DB "/eth_store_db/store.db"
-
-static int callback(void *data, int argc, char **argv, char **azColName)
+int main(int argc, char **argv)
 {
-    int i;
 
-    fprintf(stderr, "%s: ", (const char *)data);
-    for (i = 0; i < argc; i++)
-    {
-        printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
-    }
-    printf("\n");
-    return 0;
-}
-
-int main(int argc, char *argv[])
-{
     sqlite3 *db;
-    char *zErrMsg = 0;
+    int result;
+    // char **dbResult = NULL; //是 char ** 类型，两个*号
+    // int nRow, nColumn;
+    // int i, j;
+    // int index;
     int rc;
-    char *sql;
-    const char *data = "Callback function called";
-    /* Open database */
-    rc = sqlite3_open(STORE_DB, &db);
-    if (rc)
+
+    if (argc < 5)
     {
-        fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
+        printf("Usage %s: <tablename> <colume_name> <condition> <new_colume_val>\n", argv[0]);
         exit(0);
     }
-    else
+    char *tablename = argv[1];
+    char *columename = argv[2];
+    char *condition = argv[3];
+    char *new_value = argv[4];
+
+    result = sqlite3_open(STORE_DB, &db);
+    if (result != SQLITE_OK)
     {
-        fprintf(stdout, "Opened database successfully\n");
+        //数据库打开失败
+        fprintf(stderr, "open db failed.");
+        return -1;
     }
 
-    /* Create SQL statement */
-    sql = "SELECT * from COMPANY WHERE NAME=\"Teddy\"";
-    /* Execute SQL statement */
-    rc = sqlite3_exec(db, sql, callback, (void *)data, &zErrMsg);
-    if (rc != SQLITE_OK)
+    //数据库操作代码
+
+    rc = update_table(db, tablename, columename, condition, new_value);
+    if (rc < 0)
     {
-        fprintf(stderr, "SQL error: %s\n", zErrMsg);
-        sqlite3_free(zErrMsg);
+        fprintf(stderr, "sql err:%s\n", sqlite3_errmsg(db));
     }
-    else
-    {
-        fprintf(stdout, "Operation successfully\n");
-    }
+    //到这里，不论数据库查询是否成功，都释放 char** 查询结果，使用 sqlite 提供的功能来释放
+
+    //关闭数据库
+
     sqlite3_close(db);
+
     return 0;
 }
