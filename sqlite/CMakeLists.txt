@@ -5,6 +5,9 @@ set(SQLITE_SRC_FILES
 set(CREATE_SHELF_SRC_FILES
     app/create_shelf.c
 )
+set(DELETE_SHELF_SRC_FILES
+    app/delete_shelf.c
+)
 set(SELECT_DB_SRC_FILES
     app/select_db.c
 )
@@ -13,7 +16,7 @@ set(DB_TEST_SRC_FILES
 )
 
 
-# 包含目录
+# 包含目录 作为makefile的-I选项
 include_directories(
     src
     /opt/sqlite-arm/include
@@ -38,6 +41,19 @@ target_link_libraries(create_shelf
     m #链接数学库
 )
 set_target_properties(create_shelf PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/sqlite/app
+)
+
+##################################################
+# 设置目标 delete_shelf
+add_executable(delete_shelf ${DELETE_SHELF_SRC_FILES} ${SQLITE_SRC_FILES})
+
+# 链接外部库 (sqlite3)
+target_link_libraries(delete_shelf
+    /opt/sqlite-arm/lib/libsqlite3.a
+    m #链接数学库
+)
+set_target_properties(delete_shelf PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/sqlite/app
 )
 

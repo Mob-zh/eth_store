@@ -11,6 +11,13 @@ set(RFID_GETELEM_SRC_FILES
     ../sqlite/src/rfid_db.c  
 )
 
+# RFID DelElem 源文件
+set(RFID_DELELEM_SRC_FILES
+    ${COMMON_SRC_FILES}
+    app/rfid_DelElem.c
+    ../sqlite/src/rfid_db.c  
+)
+
 # RFID 测试文件
 set(RFID_TEST_SRC_FILES
     ${COMMON_SRC_FILES}
@@ -33,6 +40,13 @@ include_directories(src /opt/sqlite-arm/include ../sqlite/src)
 add_executable(rfid_GetElem ${RFID_GETELEM_SRC_FILES})
 target_link_libraries(rfid_GetElem ${SQLITE_LIB_PATH} m)
 set_target_properties(rfid_GetElem PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/rfid/app
+)
+
+# 创建 rfid_DelElem 目标
+add_executable(rfid_DelElem ${RFID_DELELEM_SRC_FILES})
+target_link_libraries(rfid_DelElem ${SQLITE_LIB_PATH} m)
+set_target_properties(rfid_DelElem PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/rfid/app
 )
 

@@ -131,9 +131,30 @@ int Fetch_Elem(sqlite3 *db, struct element elem)
     char *zErrMsg = 0;
     int rc;
     char sql[SQL_LENTH];
+    int shelf_id, slot_id;
+    char **dbResult = NULL;
+    int nRow, nColumn;
 
-    // 删除关联的槽位数据
-    sprintf(sql, "DELETE FROM slot WHERE shelf_id = %d AND slot_id = %d", elem.shelf_id, elem.slot_id);
+    sprintf(sql, "SELECT shelf_id,slot_id FROM element WHERE elem_id = '%x' ;", elem.id);
+    rc = sqlite3_get_table(db, sql, &dbResult, &nRow, &nColumn, &zErrMsg);
+    if (rc != SQLITE_OK)
+    {
+        fprintf(stderr, "SQL error when checking slots: %s\n", zErrMsg);
+        sqlite3_free(zErrMsg);
+        return -1;
+    }
+    if (nRow == 0)
+    {
+        fprintf(stderr, "No data found for elem_id '%x'\n", elem.id);
+        sqlite3_free_table(dbResult);
+        return -1;
+    }
+
+    shelf_id = atoi(dbResult[2]); // dbResult[2] 是查询结果的第一条记录
+    slot_id = atoi(dbResult[3]);  // dbResult[3] 是查询结果的第二条记录
+    //printf("shelf_id = %d，slot_id=%d\n", shelf_id, slot_id);
+    // 删除相关联的数据
+    sprintf(sql, "DELETE FROM element WHERE elem_id = '%x'", elem.id);
 
     rc = sqlite3_exec(db, sql, NULL, NULL, &zErrMsg);
     if (rc != SQLITE_OK)
@@ -143,6 +164,21 @@ int Fetch_Elem(sqlite3 *db, struct element elem)
         return -1;
     }
 
+    sprintf(sql, "UPDATE slot  SET  have_loaded=have_loaded-1 "
+                 "WHERE shelf_id=%d AND slot_id=%d ;",
+            shelf_id, slot_id);
+
+    rc = sqlite3_exec(db, sql, NULL, NULL, &zErrMsg);
+    if (rc != SQLITE_OK)
+    {
+        fprintf(stderr, "SQL error when deleting slots: %s\n", zErrMsg);
+        sqlite3_free(zErrMsg);
+        return -1;
+    }
+
+    printf("%d号货架%d货仓的货物被取走\n", shelf_id, slot_id);
+    printf("货物信息：\n");
+    printf("id：%x\ntype：%s  %d%s\n", elem.id, elem.type, elem.value, elem.unit);
     return 0;
 }
 
@@ -313,9 +349,9 @@ int alloc_position(sqlite3 *db, struct element *elem)
         index = nColumn;                          // 数据部分从 nColumn 开始
         elem->shelf_id = atoi(dbResult[index++]); // 转换为整数
         elem->slot_id = atoi(dbResult[index++]);
-        int available_load = atoi(dbResult[index]) - 1;
+        int available_load = atoi(dbResult[index]);
 
-        printf("%s成功分配到%d号货架，%d号仓，该仓剩余容量为%d\n",
+        printf("%s预分配到%d号货架，%d号仓，该仓剩余容量为%d\n",
                elem->type, elem->shelf_id, elem->slot_id, available_load);
     }
     else
@@ -329,7 +365,6 @@ int alloc_position(sqlite3 *db, struct element *elem)
     return 0;
 }
 
-//查
 int print_table(sqlite3 *db, const char *tablename)
 {
     if (db == NULL || tablename == NULL)
